@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         vertical: 8,
                       )),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: navigateToSignup,
                     child: Container(
                         child: const Text(
                           "Sign up",
