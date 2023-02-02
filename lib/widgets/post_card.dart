@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_instagram_clone/models/user.dart';
 import 'package:flutter_instagram_clone/providers/user_provider.dart';
+import 'package:flutter_instagram_clone/resources/firestore_methods.dart';
 import 'package:flutter_instagram_clone/utils/colors.dart';
 import 'package:flutter_instagram_clone/widgets/like_animation.dart';
 import 'package:intl/intl.dart';
@@ -98,41 +99,49 @@ class _PostCardState extends State<PostCard> {
 
           //IMAGE SECTION
           GestureDetector(
-            onDoubleTap: () {
+            onDoubleTap: () async {
+              await FirestoreMethods().likePost(
+                widget.snap['postId'],
+                user.uid,
+                widget.snap['likes'],
+              );
               setState(() {
                 isLikeAnimating = true;
               });
             },
-            child: Stack(alignment: Alignment.center, children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.35,
-                width: double.infinity,
-                child: Image.network(
-                  widget.snap['postUrl'],
-                  fit: BoxFit.cover,
-                ),
-              ),
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: isLikeAnimating ? 1 : 0,
-                child: LikeAnimation(
-                  child: const Icon(
-                    Icons.favorite,
-                    color: Colors.white,
-                    size: 100,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.35,
+                  width: double.infinity,
+                  child: Image.network(
+                    widget.snap['postUrl'],
+                    fit: BoxFit.cover,
                   ),
-                  isAnimating: isLikeAnimating,
-                  duration: const Duration(
-                    milliseconds: 400,
-                  ),
-                  onEnd: () {
-                    setState(() {
-                      isLikeAnimating = false;
-                    });
-                  },
                 ),
-              )
-            ]),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isLikeAnimating ? 1 : 0,
+                  child: LikeAnimation(
+                    child: const Icon(
+                      Icons.favorite,
+                      color: Colors.white,
+                      size: 120,
+                    ),
+                    isAnimating: isLikeAnimating,
+                    duration: const Duration(
+                      milliseconds: 400,
+                    ),
+                    onEnd: () {
+                      setState(() {
+                        isLikeAnimating = false;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
 
           //LIKE COMMENT SECTION
@@ -142,11 +151,21 @@ class _PostCardState extends State<PostCard> {
                 isAnimating: widget.snap['likes'].contains(user.uid),
                 smallLike: true,
                 child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.favorite,
-                    color: Colors.red,
-                  ),
+                  onPressed: () async {
+                    await FirestoreMethods().likePost(
+                      widget.snap['postId'],
+                      user.uid,
+                      widget.snap['likes'],
+                    );
+                  },
+                  icon: widget.snap['likes'].contains(user.uid)
+                      ? const Icon(
+                          Icons.favorite,
+                          color: Colors.red,
+                        )
+                      : const Icon(
+                          Icons.favorite_border,
+                        ),
                 ),
               ),
               IconButton(
